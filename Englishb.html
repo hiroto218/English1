@@ -1,0 +1,1816 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高校英文法学習アプリ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .screen {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            min-height: 500px;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .units-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .unit-card {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border-radius: 15px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .unit-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: rgba(255,255,255,0.1);
+            transform: rotate(45deg);
+            transition: all 0.6s ease;
+            opacity: 0;
+        }
+
+        .unit-card:hover::before {
+            opacity: 1;
+            top: -60%;
+            left: -60%;
+        }
+
+        .unit-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+
+        .unit-card h3 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .unit-card p {
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .grammar-summary {
+            line-height: 1.8;
+        }
+
+        .grammar-summary h2 {
+            color: #4facfe;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .grammar-summary h3 {
+            color: #667eea;
+            margin: 25px 0 15px 0;
+            font-size: 1.3em;
+        }
+
+        .grammar-summary p {
+            margin-bottom: 15px;
+        }
+
+        .example-box {
+            background: #f8f9ff;
+            border-left: 4px solid #4facfe;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+
+        .button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .problem-area {
+            margin-top: 30px;
+        }
+
+        .problem-sentence {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .word-bank {
+            background: #f8f9ff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            min-height: 80px;
+            border: 2px dashed #ccc;
+        }
+
+        .word-bank h4 {
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+
+        .answer-area {
+            background: #fff;
+            border: 2px solid #4facfe;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            min-height: 80px;
+            position: relative;
+        }
+
+        .answer-area h4 {
+            margin-bottom: 15px;
+            color: #4facfe;
+        }
+
+        .word-token {
+            display: inline-block;
+            background: #4facfe;
+            color: white;
+            padding: 8px 15px;
+            margin: 5px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .word-token:hover {
+            background: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .word-token.in-answer {
+            background: #00f2fe;
+        }
+
+        .progress-bar {
+            background: #f0f0f0;
+            border-radius: 10px;
+            height: 8px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .feedback {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+            font-weight: bold;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .feedback.correct {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback.incorrect {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .back-button {
+            background: #6c757d;
+            margin-right: 10px;
+        }
+
+        .back-button:hover {
+            background: #5a6268;
+        }
+        .video-container {
+         margin: 20px 0;
+         text-align: center;
+         background: #f8f9ff;
+         padding: 20px;
+         border-radius: 10px;
+         border: 2px solid #4facfe;
+        }
+
+        .video-container video {
+         max-width: 100%;
+         height: auto;
+         border-radius: 8px;
+         box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .video-container h4 {
+         color: #4facfe;
+         margin-bottom: 15px;
+         font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 高1英文法マスター</h1>
+            <p>文法を理解して、実践問題で力をつけよう！</p>
+        </div>
+
+        <div class="screen" id="mainScreen">
+            <!-- 単元選択画面 -->
+            <div id="unitSelection">
+                <h2>📖 学習したい単元を選択してください</h2>
+                <div class="units-grid">
+                    <div class="unit-card" onclick="selectUnit('present-perfect')">
+                        <h3>完了形</h3>
+                        <p>have/has/had + 過去分詞の用法をマスターしよう</p>
+                    </div>
+                    <div class="unit-card" onclick="selectUnit('passive-voice')">
+                        <h3>受動態</h3>
+                        <p>be動詞 + 過去分詞の文構造を学ぼう</p>
+                    </div>
+                    <div class="unit-card" onclick="selectUnit('relative-clause')">
+                        <h3>関係代名詞</h3>
+                        <p>who, which, thatの使い分けを理解しよう</p>
+                    </div>
+                    <div class="unit-card" onclick="selectUnit('conditional')">
+                        <h3>仮定法</h3>
+                        <p>if文の様々な形を使いこなそう</p>
+                    </div>
+                                        <div class="unit-card" onclick="selectUnit('infinitive')">
+                        <h3>不定詞</h3>
+                        <p>to + 動詞の原形の様々な用法を学ぼう</p>
+                    </div>
+                    <div class="unit-card" onclick="selectUnit('modal-verbs')">
+                        <h3>助動詞</h3>
+                        <p>can, must, shouldなどの使い分けを学ぼう</p>
+                    </div>
+                    <div class="unit-card" onclick="selectUnit('future-expressions')">
+                        <h3>未来を表す表現</h3>
+                        <p>will, be going to, 現在進行形の使い分けをマスター</p>
+                    </div>
+                    <div class="unit-card" onclick="selectUnit('present-past-expressions')">
+                        <h3>現在と過去を表す表現</h3>
+                        <p>現在形・過去形・現在進行形・過去進行形を理解しよう</p>
+                    </div>
+                    <div class="unit-card" onclick="selectUnit('comparison-1')">
+                        <h3>比較①</h3>
+                        <p>比較級・最上級を理解しよう</p>
+                    </div>
+                    <div class="unit-card" onclick="selectUnit('comparison-2')">
+                        <h3>比較②</h3>
+                        <p>同等比較・倍数比較を理解しよう</p>
+                    </div>
+                    <div class="unit-card" onclick="selectUnit('gerund-infinitive-1')">
+                        <h3>動名詞・to不定詞①（名詞的用法）</h3>
+                        <p>名詞のはたらきをする用法を理解しよう</p>
+                    </div>
+                    <div class="unit-card" onclick="selectUnit('gerund-infinitive-2')">
+                        <h3>to不定詞②（形容詞的用法・副詞的用法）</h3>
+                        <p>to不定詞の２つの用法を理解しよう</p>
+                    </div>
+                    <div class="unit-card" onclick="selectUnit('participle')">
+                        <h3>分詞</h3>
+                        <p>修飾・説明する文法を理解しよう</p>
+                    </div>
+                    <div class="unit-card" onclick="selectUnit('relative-adverbs')">
+                        <h3>関係副詞</h3>
+                        <p>接続詞と副詞の働きを備えた文法を理解しよう</p>
+                    </div>
+                    <div class="unit-card" onclick="selectUnit('conjunctions')">
+                        <h3>接続詞</h3>
+                        <p>文と文を繋ぐ文法を理解しよう</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 文法まとめ画面 -->
+            <div id="grammarSummary" style="display: none;">
+                <div class="grammar-summary" id="summaryContent">
+                    <!-- 動的に挿入される -->
+                </div>
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="button back-button" onclick="showUnitSelection()">← 単元選択に戻る</button>
+                    <button class="button" onclick="startPractice()">練習問題を開始 →</button>
+                </div>
+            </div>
+
+            <!-- 練習問題画面 -->
+            <div id="practiceScreen" style="display: none;">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="problem-area">
+                    <div class="problem-sentence">
+                        <strong>問題 <span id="problemNumber"></span>:</strong> 
+                        <span id="problemText"></span>
+                    </div>
+                    
+                    <div class="word-bank">
+                        <h4>📝 単語一覧</h4>
+                        <div id="wordBank"></div>
+                    </div>
+                    
+                    <div class="answer-area">
+                        <h4>✍️ 答え</h4>
+                        <div id="answerArea"></div>
+                    </div>
+                    
+                    <div id="feedback"></div>
+                    
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button class="button back-button" onclick="showGrammarSummary()">← 文法まとめに戻る</button>
+                        <button class="button" onclick="checkAnswer()">答えを確認</button>
+                        <button class="button" onclick="nextProblem()" id="nextButton" style="display: none;">次の問題 →</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // アプリケーションの状態管理
+        let currentUnit = '';
+        let currentProblem = 0;
+        let problems = [];
+        let selectedWords = [];
+        let score = 0;
+
+        // 文法データベース
+        const grammarData = {
+            // grammarDataオブジェクトの最初に以下を追加
+'present-perfect': {
+    title: '完了形',
+    summary: `
+        <h2>完了形の基本</h2>
+        <p>完了形は「have/has/had + 過去分詞」の形で、過去から現在まで(ある時点まで)の関係を表現します。</p>
+        
+        <h3>📋 基本構造</h3>
+        <div class="example-box">
+            <strong>現在完了:</strong> have/has + 過去分詞<br>
+            <strong>過去完了:</strong> had + 過去分詞<br>
+            <strong>現在完了進行形:</strong> have/has been + 過去分詞
+        </div>
+        
+        <h3>🎯 現在完了の用法</h3>
+        <p><strong>1. 完了:</strong> 「〜してしまった」</p>
+        <div class="example-box">
+            I have finished my homework. (宿題を終えてしまった)
+        </div>
+        
+        <p><strong>2. 経験:</strong> 「〜したことがある」</p>
+        <div class="example-box">
+            I have been to Tokyo. (東京に行ったことがある)
+        </div>
+        
+        <p><strong>3. 継続:</strong> 「〜している」</p>
+        <div class="example-box">
+            I have lived here for five years. (5年間ここに住んでいる)
+        </div>
+        <h3>🎯 現在完了進行形の用法</h3>
+        <p>過去のある時点から現在までの<strong>動作の継続</strong>（見てわかること）を表す。</p>
+        <div class="example-box">
+            It has been raining since last Thursday. (選手の木曜日からずっと雨が降っています。)
+        </div>
+    `,
+    problems: [
+        {
+            japanese: '彼らはその映画を何回観たことがあるのですか？',
+            words: ['How', 'many', 'times', 'have', 'they','watched','the','movie','?'],
+            correct:['How', 'many', 'times', 'have', 'they','watched','the','movie','?']
+        },
+        {
+            japanese: '彼は東京に行ったことがあります。',
+            words: ['He', 'has', 'been', 'to', 'Tokyo'],
+            correct: ['He', 'has', 'been', 'to', 'Tokyo']
+        },
+        {
+            japanese: '私たちは3年間英語を勉強しています。',
+            words: ['We', 'have', 'studied', 'English', 'for', 'three', 'years'],
+            correct: ['We', 'have', 'studied', 'English', 'for', 'three', 'years']
+        }
+    ]
+},
+    
+            'passive-voice': {
+                title: '受動態',
+                summary: `
+                    <h2>受動態</h2>
+
+                    <div class="video-container">
+                        <h4>📹️ 受動態の解説動画</h4>
+                        <video controls width="640">
+                        <source src="video/newEnglish.mp4" type="video/mp4">
+                        </video>
+                    </div>
+
+                    <h2>受動態の基本</h2>
+                    <p>受動態は「be動詞 + 過去分詞」の形で、動作を受ける側に焦点を当てた表現です。</p>
+                    
+                    <h3>📋 基本構造</h3>
+                    <div class="example-box">
+                        <strong>能動態:</strong> 主語 + 動詞 + 目的語<br>
+                        <strong>受動態:</strong> 主語 + be動詞 + 過去分詞 + (by + 動作主)
+                    </div>
+                    
+                    <h3>🔄 変換例</h3>
+                    <div class="example-box">
+                        <strong>能動態:</strong> Tom wrote this letter.<br>
+                        <strong>受動態:</strong> This letter was written by Tom.
+                    </div>
+                    
+                    <h3>⏰ 時制別の受動態</h3>
+                    <p><strong>現在:</strong> am/is/are + 過去分詞</p>
+                    <p><strong>過去:</strong> was/were + 過去分詞</p>
+                    <p><strong>未来:</strong> will be + 過去分詞</p>
+                    <p><strong>現在完了:</strong> have/has been + 過去分詞</p>
+                `,
+                problems: [
+                    {
+                        japanese: 'この本は多くの人に読まれています。',
+                        words: ['This', 'book', 'is', 'read', 'by', 'many', 'people'],
+                        correct: ['This', 'book', 'is', 'read', 'by', 'many', 'people']
+                    },
+                    {
+                        japanese: 'その建物は去年建てられました。',
+                        words: ['The', 'building', 'was', 'built', 'last', 'year'],
+                        correct: ['The', 'building', 'was', 'built', 'last', 'year']
+                    },
+                    {
+                        japanese: '新しい橋が来年作られるでしょう。',
+                        words: ['A', 'new', 'bridge', 'will', 'be', 'built', 'next', 'year'],
+                        correct: ['A', 'new', 'bridge', 'will', 'be', 'built', 'next', 'year']
+                    }
+                ]
+            },
+            'relative-clause': {
+                title: '関係代名詞',
+                summary: `
+                    <h2>関係代名詞の基本</h2>
+                    <p>関係代名詞は2つの文を繋げて、名詞を詳しく説明する働きをします。</p>
+                    
+                    <h3>📋 主な関係代名詞</h3>
+                    <div class="example-box">
+                        <strong>who:</strong> 人（主格・目的格）<br>
+                        <strong>which:</strong> 物・動物（主格・目的格）<br>
+                        <strong>that:</strong> 人・物・動物（主格・目的格）<br>
+                        <strong>whose:</strong> 所有格（人・物・動物）
+                    </div>
+                    
+                    <h3>🎯 使い分け</h3>
+                    <p><strong>主格の関係代名詞:</strong> 関係代名詞が主語の働きをする</p>
+                    <div class="example-box">
+                        The man who is standing there is my father.<br>
+                        (そこに立っている男性は私の父です)
+                    </div>
+                    
+                    <p><strong>目的格の関係代名詞:</strong> 関係代名詞が目的語の働きをする</p>
+                    <div class="example-box">
+                        This is the book (which/that) I bought yesterday.<br>
+                        (これは私が昨日買った本です)
+                    </div>
+                `,
+                problems: [
+                    {
+                        japanese: 'あそこに立っている人は私の先生です。',
+                        words: ['The', 'person', 'who', 'is', 'standing', 'there', 'is', 'my', 'teacher'],
+                        correct: ['The', 'person', 'who', 'is', 'standing', 'there', 'is', 'my', 'teacher']
+                    },
+                    {
+                        japanese: 'これは私が昨日買った本です。',
+                        words: ['This', 'is', 'the', 'book', 'that', 'I', 'bought', 'yesterday'],
+                        correct: ['This', 'is', 'the', 'book', 'that', 'I', 'bought', 'yesterday']
+                    },
+                    {
+                        japanese: '彼は車を持っている男性です。',
+                        words: ['He', 'is', 'the', 'man', 'who', 'has', 'a', 'car'],
+                        correct: ['He', 'is', 'the', 'man', 'who', 'has', 'a', 'car']
+                    }
+                ]
+            },
+            'conditional': {
+                title: '仮定法',
+                summary: `
+                    <h2>仮定法の基本</h2>
+                    <p>仮定法は現実とは異なる仮定や願望を表現する文法です。</p>
+                    
+                    <h3>📋 仮定法過去（現在の仮定）</h3>
+                    <div class="example-box">
+                        <strong>構造:</strong> If + 主語 + 動詞の過去形, 主語 + would + 動詞の原形<br>
+                        <strong>例:</strong> If I had time, I would travel around the world.<br>
+                        (もし時間があれば、世界中を旅行するのに)
+                    </div>
+                    
+                    <h3>📋 仮定法過去完了（過去の仮定）</h3>
+                    <div class="example-box">
+                        <strong>構造:</strong> If + 主語 + had + 過去分詞, 主語 + would have + 過去分詞<br>
+                        <strong>例:</strong> If I had studied harder, I would have passed the exam.<br>
+                        (もっと勉強していたら、試験に合格していたのに)
+                    </div>
+                    
+                    <h3>🎯 重要ポイント</h3>
+                    <p>• be動詞の仮定法過去はすべて「were」を使用</p>
+                    <p>• 「wish」の後も仮定法を使用</p>
+                    <p>• 「as if」の後も仮定法を使用</p>
+                `,
+                problems: [
+                    {
+                        japanese: 'もし雨が降れば、私たちは家にいるでしょう。',
+                        words: ['If', 'it', 'rained', 'we', 'would', 'stay', 'at', 'home'],
+                        correct: ['If', 'it', 'rained', 'we', 'would', 'stay', 'at', 'home']
+                    },
+                    {
+                        japanese: 'もし彼が来ていたら、私たちは楽しかったでしょう。',
+                        words: ['If', 'he', 'had', 'come', 'we', 'would', 'have', 'enjoyed'],
+                        correct: ['If', 'he', 'had', 'come', 'we', 'would', 'have', 'enjoyed']
+                    },
+                    {
+                        japanese: '私が鳥だったら、空を飛べるのに。',
+                        words: ['If', 'I', 'were', 'a', 'bird', 'I', 'could', 'fly', 'in', 'the', 'sky'],
+                        correct: ['If', 'I', 'were', 'a', 'bird', 'I', 'could', 'fly', 'in', 'the', 'sky']
+                    }
+                ]
+            },
+            'infinitive': {
+                title: '不定詞',
+                summary: `
+                <h2>不定詞の基本</h2>   
+                <p>不定詞は「to + 動詞の原形」の形で、名詞・形容詞・副詞の働きをします。</p>
+        
+                <h3>📋 基本構造</h3>
+                <div class="example-box">
+                    <strong>形:</strong> to + 動詞の原形<br>
+                    <strong>例:</strong> to study, to play, to read
+                </div>
+        
+                <h3>🎯 主な用法</h3>
+                <p><strong>1. 名詞的用法:</strong> 主語や目的語になる</p>
+                <div class="example-box">
+                    To study English is important. (英語を勉強することは重要です)
+                </div>
+        
+                <p><strong>2. 形容詞的用法:</strong> 名詞を修飾する</p>
+                <div class="example-box">
+                    I have something to do. (私にはやることがあります)
+                </div>
+        
+                <p><strong>3. 副詞的用法:</strong> 目的や理由を表す</p>
+                <div class="example-box">
+                    I went to the library to study. (勉強するために図書館に行きました)
+                </div>
+    `,
+    problems: [
+        {
+            japanese: '英語を勉強することは楽しいです。',
+            words: ['To', 'study', 'English', 'is', 'fun'],
+            correct: ['To', 'study', 'English', 'is', 'fun']
+        },
+        {
+            japanese: '私は読む本が必要です。',
+            words: ['I', 'need', 'a', 'book', 'to', 'read'],
+            correct: ['I', 'need', 'a', 'book', 'to', 'read']
+        },
+        {
+            japanese: '彼女は友達に会うために出かけました。',
+            words: ['She', 'went', 'out', 'to', 'meet', 'her', 'friends'],
+            correct: ['She', 'went', 'out', 'to', 'meet', 'her', 'friends']
+        }
+    ]
+}, 
+            'modal-verbs': {
+            title:'助動詞',
+            summary:  `
+            <h2>助動詞の基本</h2>
+            <p>助動詞は動詞の前に置いて、話し手の気持ちや推量、能力、義務などを表現します。</p>
+        
+            <h3>📋 主な助動詞</h3>
+                <div class="example-box">
+                <strong>can/could:</strong> 能力・可能性・許可<br>
+                <strong>may/might:</strong> 許可・推量・可能性<br>
+                <strong>must:</strong> 義務・推量<br>
+                <strong>should:</strong> 義務・助言・推量<br>
+                <strong>will/would:</strong> 未来・意志・推量・依頼<br>
+                <strong>be able to~/have to~</strong>可能・義務・不必要性
+            </div>
+        
+            <h3>🎯 can/could の用法</h3>
+                <p><strong>1. 能力:</strong> 「〜できる」</p>
+            <div class="example-box">
+                I can speak English. (私は英語を話せます)<br>
+                She could swim when she was five. (彼女は5歳の時泳げました)
+            </div>
+        
+            <p><strong>2. 許可:</strong> 「〜してもよい」</p>
+            <div class="example-box">
+                Can I use your pen? (あなたのペンを使ってもいいですか？)<br>
+                Could you help me? (手伝ってもらえませんか？)
+            </div>
+        
+            <h3>🎯 may/might の用法</h3>
+            <p><strong>1. 許可:</strong> 「〜してもよい」（丁寧な表現）</p>
+            <div class="example-box">
+                May I come in? (入ってもよろしいですか？)
+            </div>
+        
+            <p><strong>2. 推量:</strong> 「〜かもしれない」</p>
+            <div class="example-box">
+                It may rain tomorrow. (明日雨が降るかもしれません)<br>
+                He might be at home. (彼は家にいるかもしれません)
+            </div>
+        
+            <h3>🎯 must の用法</h3>
+            <p><strong>1. 義務:</strong> 「〜しなければならない」</p>
+            <div class="example-box">
+                You must finish your homework. (宿題を終えなければなりません)
+            </div>
+        
+            <p><strong>2. 強い推量:</strong> 「〜に違いない」</p>
+            <div class="example-box">
+                He must be tired. (彼は疲れているに違いない)
+            </div>
+        
+            <h3>🎯 should の用法</h3>
+            <p><strong>1. 義務・助言:</strong> 「〜すべきだ」「〜した方がよい」</p>
+            <div class="example-box">
+                You should study harder. (もっと勉強すべきです)<br>
+                We should leave now. (今出発した方がよい)
+            </div>
+        
+            <p><strong>2. 推量:</strong> 「〜のはずだ」</p>
+            <div class="example-box">
+                The train should arrive soon. (電車はもうすぐ着くはずです)
+            </div>
+        
+            <h3>🎯 be able to~/have to~ の用法</h3>
+            <p><strong>1. 可能:</strong> 「〜できる」</p>
+            <div class="example-box">
+                Tom will be able to achieve the goal soon. (トムはもうすぐ目標を達成できるでしょう)
+            </div>
+        
+            <p><strong>2. 義務[不必要]:</strong> 「〜しなければならない、必要はない」</p>
+            <div class="example-box">
+                Ken has to be home by eight. (ケンは8時までに帰宅しなければならない)<br>
+                Yuki doesn't have to go to class today. (ユキは今日授業に行く必要はない)
+            </div>
+
+            <h3>⚠️ 重要ポイント</h3>
+            <p>• 助動詞の後は必ず動詞の原形</p>
+            <p>• 助動詞は重ねて使わない（×can will）</p>
+            <p>• 疑問文・否定文でもdoは使わない</p>
+        `,
+        problems: [
+        {
+            japanese: '私は泳ぐことができます。',
+            words: ['I', 'can', 'swim'],
+            correct: ['I', 'can', 'swim']
+        },
+        {
+            japanese: 'あなたはもっと勉強すべきです。',
+            words: ['You', 'should', 'study', 'more'],
+            correct: ['You', 'should', 'study', 'more']
+        },
+        {
+            japanese: '明日雨が降るかもしれません。',
+            words: ['It', 'may', 'rain', 'tomorrow'],
+            correct: ['It', 'may', 'rain', 'tomorrow']
+        },
+        {
+            japanese: '私たちは今出発しなければなりません。',
+            words: ['We', 'must', 'leave', 'now'],
+            correct: ['We', 'must', 'leave', 'now']
+        },
+        {
+            japanese: '窓を開けてくれませんか？',
+            words: ['Will', 'you', 'open', 'the', 'window'],
+            correct: ['Will', 'you', 'open', 'the', 'window']
+        },
+        {
+            japanese: '彼女は家にいるかもしれません。',
+            words: ['She', 'might', 'be', 'at', 'home'],
+            correct: ['She', 'might', 'be', 'at', 'home']
+        },
+        {
+            japanese: 'ペンを借りてもいいですか？',
+            words: ['Can', 'I', 'borrow', 'your', 'pen'],
+            correct: ['Can', 'I', 'borrow', 'your', 'pen']
+        },
+        {
+            japanese: '彼は疲れているに違いない。',
+            words: ['He', 'must', 'be', 'tired'],
+            correct: ['He', 'must', 'be', 'tired']
+        }
+    ]
+},
+'future-expressions': {
+    title: '未来を表す表現',
+    summary: `
+        <h2>未来を表す表現の基本</h2>   
+        <p>英語では未来のことを表すのに、主にwill、be going to、現在進行形、現在形を使います。</p>
+
+        <h3>📋 主な表現方法</h3>
+        <div class="example-box">
+            <strong>1. will + 動詞の原形</strong><br>
+            <strong>2. be going to + 動詞の原形</strong><br>
+            <strong>3. 現在進行形（be + -ing）</strong><br>
+            <strong>4. 現在形</strong>
+        </div>
+
+        <h3>🎯 用法の違い</h3>
+        <p><strong>1. will:</strong> その場で決めたこと、予測、約束</p>
+        <div class="example-box">
+            I will help you. (手伝ってあげるよ - その場で決めた)<br>
+            It will rain tomorrow. (明日雨が降るでしょう - 予測)
+        </div>
+
+        <p><strong>2. be going to:</strong> 計画していること、確実な予測</p>
+        <div class="example-box">
+            I'm going to visit my grandmother. (おばあちゃんを訪ねる予定です)<br>
+            Look at those clouds! It's going to rain. (雲を見て！雨が降りそうだ)
+        </div>
+
+        <p><strong>3. 現在進行形:</strong> 決まっている予定</p>
+        <div class="example-box">
+            I'm meeting Tom at 3 o'clock. (3時にトムに会う予定です)
+        </div>
+
+        <p><strong>4. 現在形:</strong> 時刻表や予定表に基づく未来</p>
+        <div class="example-box">
+            The train leaves at 8:30. (電車は8時30分に出発します)
+        </div>
+    `,
+    problems: [
+        {
+            japanese: '明日雨が降るでしょう。',
+            words: ['It', 'will', 'rain', 'tomorrow'],
+            correct: ['It', 'will', 'rain', 'tomorrow']
+        },
+        {
+            japanese: '私は来週京都に行く予定です。',
+            words: ['I', 'am', 'going', 'to', 'visit', 'Kyoto', 'next', 'week'],
+            correct: ['I', 'am', 'going', 'to', 'visit', 'Kyoto', 'next', 'week']
+        },
+        {
+            japanese: '映画は7時に始まります。',
+            words: ['The', 'movie', 'starts', 'at', '7', 'o\'clock'],
+            correct: ['The', 'movie', 'starts', 'at', '7', 'o\'clock']
+        },
+        {
+            japanese: '彼は今夜友達と会う予定です。',
+            words: ['He', 'is', 'meeting', 'his', 'friends', 'tonight'],
+            correct: ['He', 'is', 'meeting', 'his', 'friends', 'tonight']
+        },
+        {
+            japanese: '手伝ってあげるよ。',
+            words: ['I', 'will', 'help', 'you'],
+            correct: ['I', 'will', 'help', 'you']
+        }
+    ]
+},
+'present-past-expressions': {
+    title: '現在と過去を表す表現',
+    summary: `
+        <h2>現在と過去を表す表現の基本</h2>   
+        <p>英語では現在と過去の状況を表すのに、現在形・現在進行形・過去形・過去進行形を使い分けます。</p>
+
+        <h3>📋 主な表現方法</h3>
+        <div class="example-box">
+            <strong>現在:</strong> 現在形、現在進行形<br>
+            <strong>過去:</strong> 過去形、過去進行形
+        </div>
+
+        <h3>🎯 現在を表す表現</h3>
+        <p><strong>1. 現在形:</strong> 習慣、一般的事実、状態</p>
+        <div class="example-box">
+            I play tennis every weekend. (毎週末テニスをします - 習慣)<br>
+            The sun rises in the east. (太陽は東から昇る - 事実)<br>
+            I live in Tokyo. (東京に住んでいます - 状態)
+        </div>
+
+        <p><strong>2. 現在進行形 (be + -ing):</strong> 今まさに行っていること</p>
+        <div class="example-box">
+            I am studying English now. (今英語を勉強しています)<br>
+            She is watching TV. (彼女はテレビを見ています)
+        </div>
+
+        <h3>🎯 過去を表す表現</h3>
+        <p><strong>3. 過去形:</strong> 過去の動作や状態</p>
+        <div class="example-box">
+            I played tennis yesterday. (昨日テニスをしました)<br>
+            He was a student. (彼は学生でした)
+        </div>
+
+        <p><strong>4. 過去進行形 (was/were + -ing):</strong> 過去のある時点で進行中だったこと</p>
+        <div class="example-box">
+            I was studying when she called. (彼女が電話したとき勉強していました)<br>
+            They were playing soccer at 3 o'clock. (3時にサッカーをしていました)
+        </div>
+
+        <h3>💡 使い分けのポイント</h3>
+        <div class="example-box">
+            <strong>習慣・事実:</strong> 現在形<br>
+            <strong>今していること:</strong> 現在進行形<br>
+            <strong>過去の出来事:</strong> 過去形<br>
+            <strong>過去の進行中の動作:</strong> 過去進行形
+        </div>
+    `,
+    problems: [
+        {
+            japanese: '私は毎朝7時に起きます。',
+            words: ['I', 'get', 'up', 'at', '7', 'o\'clock', 'every', 'morning'],
+            correct: ['I', 'get', 'up', 'at', '7', 'o\'clock', 'every', 'morning']
+        },
+        {
+            japanese: '彼は今宿題をしています。',
+            words: ['He', 'is', 'doing', 'his', 'homework', 'now'],
+            correct: ['He', 'is', 'doing', 'his', 'homework', 'now']
+        },
+        {
+            japanese: '昨日映画を見ました。',
+            words: ['I', 'watched', 'a', 'movie', 'yesterday'],
+            correct: ['I', 'watched', 'a', 'movie', 'yesterday']
+        },
+        {
+            japanese: '彼女が来たとき、私は料理をしていました。',
+            words: ['I', 'was', 'cooking', 'when', 'she', 'came'],
+            correct: ['I', 'was', 'cooking', 'when', 'she', 'came']
+        },
+        {
+            japanese: '太陽は西に沈みます。',
+            words: ['The', 'sun', 'sets', 'in', 'the', 'west'],
+            correct: ['The', 'sun', 'sets', 'in', 'the', 'west']
+        }
+    ]
+},
+'comparison-1': {
+    title: '比較①（比較級・最上級）',
+    summary: `
+        <h2>比較級・最上級の基本</h2>
+        <p>形容詞・副詞を使って物事を比較する表現を学びます。</p>
+        
+        <h3>📋 基本構造</h3>
+        <div class="example-box">
+            <strong>比較級:</strong> 形容詞 + er / more + 形容詞 + than<br>
+            <strong>最上級:</strong> the + 形容詞 + est / the most + 形容詞
+        </div>
+        
+        <h3>🎯 比較級の用法</h3>
+        <p><strong>1. 2つのものを比較:</strong> 「AはBより〜だ」</p>
+        <div class="example-box">
+            This book is more interesting than that one. (この本はあの本より面白い)<br>
+            Tom is taller than Mike. (トムはマイクより背が高い)
+        </div>
+        
+        <p><strong>2. 最上級:</strong> 「最も〜だ」</p>
+        <div class="example-box">
+            She is the smartest student in our class. (彼女はクラスで最も賢い生徒だ)<br>
+            This is the most beautiful flower in the garden. (これは庭で最も美しい花だ)
+        </div>
+        
+        <h3>📝 変化の規則</h3>
+        <p><strong>短い形容詞:</strong> tall → taller → tallest</p>
+        <p><strong>長い形容詞:</strong> beautiful → more beautiful → most beautiful</p>
+        <p><strong>不規則変化:</strong> good → better → best, bad → worse → worst</p>
+    `,
+    problems: [
+        {
+            japanese: 'この車はあの車より速いです。',
+            words: ['This', 'car', 'is', 'faster', 'than', 'that', 'one'],
+            correct: ['This', 'car', 'is', 'faster', 'than', 'that', 'one']
+        },
+        {
+            japanese: '彼は私たちのチームで最も上手な選手です。',
+            words: ['He', 'is', 'the', 'best', 'player', 'on', 'our', 'team'],
+            correct: ['He', 'is', 'the', 'best', 'player', 'on', 'our', 'team']
+        },
+        {
+            japanese: 'この問題はあの問題より難しいです。',
+            words: ['This', 'problem', 'is', 'more', 'difficult', 'than', 'that', 'one'],
+            correct: ['This', 'problem', 'is', 'more', 'difficult', 'than', 'that', 'one']
+        },
+        {
+            japanese: '富士山は日本で最も高い山です。',
+            words: ['Mt.', 'Fuji', 'is', 'the', 'highest', 'mountain', 'in', 'Japan'],
+            correct: ['Mt.', 'Fuji', 'is', 'the', 'highest', 'mountain', 'in', 'Japan']
+        },
+        {
+            japanese: 'この映画はあの映画より面白くないです。',
+            words: ['This', 'movie', 'is', 'less', 'interesting', 'than', 'that', 'one'],
+            correct: ['This', 'movie', 'is', 'less', 'interesting', 'than', 'that', 'one']
+        }
+    ]
+},
+'comparison-2': {
+    title: '比較②（同等比較・倍数比較・原級・世界一）',
+    summary: `
+        <h2>同等比較・倍数比較・原級・世界一の表現</h2>
+        <p>様々な比較表現のパターンを学びます。</p>
+        
+        <h3>📋 基本構造</h3>
+        <div class="example-box">
+            <strong>同等比較:</strong> as + 形容詞/副詞 + as<br>
+            <strong>倍数比較:</strong> 倍数 + as + 形容詞/副詞 + as<br>
+            <strong>世界一:</strong> the + 最上級 + in the world
+        </div>
+        
+        <h3>🎯 同等比較の用法</h3>
+        <p><strong>1. 肯定文:</strong> 「AはBと同じくらい〜だ」</p>
+        <div class="example-box">
+            She is as tall as her sister. (彼女は姉と同じくらい背が高い)<br>
+            This book is as interesting as that one. (この本はあの本と同じくらい面白い)
+        </div>
+        
+        <p><strong>2. 否定文:</strong> 「AはBほど〜ではない」</p>
+        <div class="example-box">
+            He is not as smart as his brother. (彼は兄ほど賢くない)
+        </div>
+        
+        <h3>🔢 倍数比較</h3>
+        <p><strong>「AはBの〜倍だ」</strong></p>
+        <div class="example-box">
+            This room is twice as large as that one. (この部屋はあの部屋の2倍の広さだ)<br>
+            Tokyo is three times as big as Osaka. (東京は大阪の3倍の大きさだ)
+        </div>
+        
+        <h3>🌍 世界一の表現</h3>
+        <div class="example-box">
+            Mt. Everest is the highest mountain in the world. (エverestは世界で最も高い山だ)<br>
+            This is the most beautiful place in the world. (ここは世界で最も美しい場所だ)
+        </div>
+        
+        <h3>📝 その他の重要表現</h3>
+        <p><strong>one of the + 最上級 + 複数名詞:</strong> 「最も〜なもののひとつ」</p>
+        <div class="example-box">
+            She is one of the best students in our school. (彼女は私たちの学校で最も優秀な生徒の一人だ)
+        </div>
+    `,
+    problems: [
+        {
+            japanese: '彼は私と同じくらい背が高いです。',
+            words: ['He', 'is', 'as', 'tall', 'as', 'I', 'am'],
+            correct: ['He', 'is', 'as', 'tall', 'as', 'I', 'am']
+        },
+        {
+            japanese: 'この部屋はあの部屋の2倍の広さです。',
+            words: ['This', 'room', 'is', 'twice', 'as', 'large', 'as', 'that', 'one'],
+            correct: ['This', 'room', 'is', 'twice', 'as', 'large', 'as', 'that', 'one']
+        },
+        {
+            japanese: '彼女は兄ほど速く走れません。',
+            words: ['She', 'cannot', 'run', 'as', 'fast', 'as', 'her', 'brother'],
+            correct: ['She', 'cannot', 'run', 'as', 'fast', 'as', 'her', 'brother']
+        },
+        {
+            japanese: 'これは世界で最も美しい絵画の一つです。',
+            words: ['This', 'is', 'one', 'of', 'the', 'most', 'beautiful', 'paintings', 'in', 'the', 'world'],
+            correct: ['This', 'is', 'one', 'of', 'the', 'most', 'beautiful', 'paintings', 'in', 'the', 'world']
+        },
+        {
+            japanese: '東京は世界で最も人口の多い都市の一つです。',
+            words: ['Tokyo', 'is', 'one', 'of', 'the', 'most', 'populous', 'cities', 'in', 'the', 'world'],
+            correct: ['Tokyo', 'is', 'one', 'of', 'the', 'most', 'populous', 'cities', 'in', 'the', 'world']
+        },
+        {
+            japanese: 'この車はあの車の3倍の値段です。',
+            words: ['This', 'car', 'is', 'three', 'times', 'as', 'expensive', 'as', 'that', 'one'],
+            correct: ['This', 'car', 'is', 'three', 'times', 'as', 'expensive', 'as', 'that', 'one']
+        }
+    ]
+},
+'gerund-infinitive-1': {
+    title: '動名詞・to不定詞①（名詞的用法）',
+    summary: `
+        <h2>動名詞・to不定詞の名詞的用法</h2>
+        <p>動詞を名詞として使う表現を学びます。</p>
+        
+        <h3>📋 基本構造</h3>
+        <div class="example-box">
+            <strong>動名詞:</strong> 動詞 + ing（〜すること）<br>
+            <strong>to不定詞:</strong> to + 動詞の原形（〜すること）
+        </div>
+        
+        <h3>🎯 動名詞の用法</h3>
+        <p><strong>1. 主語として:</strong> 「〜することは」</p>
+        <div class="example-box">
+            Swimming is good exercise. (泳ぐことは良い運動だ)<br>
+            Playing tennis is fun. (テニスをすることは楽しい)
+        </div>
+        
+        <p><strong>2. 目的語として:</strong> 「〜することを」</p>
+        <div class="example-box">
+            I enjoy reading books. (私は本を読むことを楽しむ)<br>
+            She finished doing her homework. (彼女は宿題をすることを終えた)
+        </div>
+        
+        <p><strong>3. 補語として:</strong> 「〜することだ」</p>
+        <div class="example-box">
+            My hobby is collecting stamps. (私の趣味は切手を集めることだ)
+        </div>
+        
+        <h3>🎯 to不定詞の名詞的用法</h3>
+        <p><strong>1. 主語として:</strong> 「〜することは」</p>
+        <div class="example-box">
+            To study English is important. (英語を勉強することは重要だ)<br>
+            It is important to study English. (英語を勉強することは重要だ)
+        </div>
+        
+        <p><strong>2. 目的語として:</strong> 「〜することを」</p>
+        <div class="example-box">
+            I want to visit Japan. (私は日本を訪れることを望む)<br>
+            She decided to become a teacher. (彼女は先生になることを決めた)
+        </div>
+        
+        <p><strong>3. 補語として:</strong> 「〜することだ」</p>
+        <div class="example-box">
+            My dream is to become a doctor. (私の夢は医者になることだ)
+        </div>
+        
+        <h3>📝 動名詞と不定詞の使い分け</h3>
+        <p><strong>動名詞のみを取る動詞:</strong> enjoy, finish, mind, give up など</p>
+        <p><strong>不定詞のみを取る動詞:</strong> want, decide, hope, plan など</p>
+        <p><strong>両方取れる動詞:</strong> like, love, hate, begin, start など</p>
+    `,
+    problems: [
+        {
+            japanese: '英語を勉強することは楽しいです。',
+            words: ['Studying', 'English', 'is', 'fun'],
+            correct: ['Studying', 'English', 'is', 'fun']
+        },
+        {
+            japanese: '私は本を読むことが好きです。',
+            words: ['I', 'like', 'reading', 'books'],
+            correct: ['I', 'like', 'reading', 'books']
+        },
+        {
+            japanese: '彼女は医者になることを望んでいます。',
+            words: ['She', 'wants', 'to', 'become', 'a', 'doctor'],
+            correct: ['She', 'wants', 'to', 'become', 'a', 'doctor']
+        },
+        {
+            japanese: '私の趣味は音楽を聞くことです。',
+            words: ['My', 'hobby', 'is', 'listening', 'to', 'music'],
+            correct: ['My', 'hobby', 'is', 'listening', 'to', 'music']
+        },
+        {
+            japanese: '彼は宿題をすることを終えました。',
+            words: ['He', 'finished', 'doing', 'his', 'homework'],
+            correct: ['He', 'finished', 'doing', 'his', 'homework']
+        },
+        {
+            japanese: '早起きすることは健康に良いです。',
+            words: ['Getting', 'up', 'early', 'is', 'good', 'for', 'health'],
+            correct: ['Getting', 'up', 'early', 'is', 'good', 'for', 'health']
+        }
+    ]
+},
+
+'infinitive-2': {
+    title: 'to不定詞②（形容詞的用法・副詞的用法）',
+    summary: `
+        <h2>to不定詞の形容詞的用法・副詞的用法</h2>
+        <p>名詞を修飾したり、理由や目的を表すto不定詞の用法を学びます。</p>
+        
+        <h3>📋 基本構造</h3>
+        <div class="example-box">
+            <strong>形容詞的用法:</strong> 名詞 + to + 動詞の原形（〜するための/〜すべき）<br>
+            <strong>副詞的用法:</strong> to + 動詞の原形（〜するために/〜して）
+        </div>
+        
+        <h3>🎯 形容詞的用法</h3>
+        <p><strong>名詞を後ろから修飾:</strong> 「〜するための/〜すべき」</p>
+        <div class="example-box">
+            I have something to tell you. (あなたに話すべきことがある)<br>
+            She needs a place to live. (彼女は住むための場所が必要だ)<br>
+            There is nothing to worry about. (心配することは何もない)
+        </div>
+        
+        <p><strong>よく使われるパターン:</strong></p>
+        <div class="example-box">
+            something/anything/nothing + to + 動詞<br>
+            time/place/way + to + 動詞<br>
+            person/people + to + 動詞
+        </div>
+        
+        <h3>🎯 副詞的用法</h3>
+        <p><strong>1. 目的:</strong> 「〜するために」</p>
+        <div class="example-box">
+            I study hard to pass the exam. (試験に合格するために一生懸命勉強する)<br>
+            She went to the library to borrow books. (本を借りるために図書館に行った)
+        </div>
+        
+        <p><strong>2. 原因・理由:</strong> 「〜して」</p>
+        <div class="example-box">
+            I was surprised to hear the news. (そのニュースを聞いて驚いた)<br>
+            He was glad to meet you. (彼はあなたに会えて嬉しかった)
+        </div>
+        
+        <p><strong>3. 結果:</strong> 「〜した結果」</p>
+        <div class="example-box">
+            I grew up to become a teacher. (私は成長して先生になった)<br>
+            He lived to be ninety years old. (彼は90歳まで生きた)
+        </div>
+        
+        <h3>📝 重要な表現</h3>
+        <p><strong>感情の原因を表す:</strong> be + 形容詞 + to不定詞</p>
+        <div class="example-box">
+            I'm happy to see you. (あなたに会えて嬉しい)<br>
+            She was sorry to be late. (彼女は遅れて申し訳なく思った)
+        </div>
+        
+        <p><strong>判断の根拠を表す:</strong> be + 形容詞 + to不定詞</p>
+        <div class="example-box">
+            You are kind to help me. (私を助けてくれるなんて親切ですね)<br>
+            It is difficult to understand. (理解するのは難しい)
+        </div>
+    `,
+    problems: [
+        {
+            japanese: '私にはやるべき宿題があります。',
+            words: ['I', 'have', 'homework', 'to', 'do'],
+            correct: ['I', 'have', 'homework', 'to', 'do']
+        },
+        {
+            japanese: '彼は英語を勉強するためにアメリカに行きました。',
+            words: ['He', 'went', 'to', 'America', 'to', 'study', 'English'],
+            correct: ['He', 'went', 'to', 'America', 'to', 'study', 'English']
+        },
+        {
+            japanese: '私はあなたに会えて嬉しいです。',
+            words: ['I', 'am', 'happy', 'to', 'see', 'you'],
+            correct: ['I', 'am', 'happy', 'to', 'see', 'you']
+        },
+        {
+            japanese: '彼女は住む場所を探しています。',
+            words: ['She', 'is', 'looking', 'for', 'a', 'place', 'to', 'live'],
+            correct: ['She', 'is', 'looking', 'for', 'a', 'place', 'to', 'live']
+        },
+        {
+            japanese: 'そのニュースを聞いて私は驚きました。',
+            words: ['I', 'was', 'surprised', 'to', 'hear', 'the', 'news'],
+            correct: ['I', 'was', 'surprised', 'to', 'hear', 'the', 'news']
+        },
+        {
+            japanese: '心配することは何もありません。',
+            words: ['There', 'is', 'nothing', 'to', 'worry', 'about'],
+            correct: ['There', 'is', 'nothing', 'to', 'worry', 'about']
+        }
+    ]
+},
+'participle': {
+    title: '分詞（現在分詞・過去分詞）',
+    summary: `
+        <h2>分詞の用法</h2>
+        <p>現在分詞（〜ing）と過去分詞（〜ed/不規則変化）を使った様々な表現を学びます。</p>
+        
+        <h3>📋 基本構造</h3>
+        <div class="example-box">
+            <strong>現在分詞:</strong> 動詞 + ing（〜している/〜する）<br>
+            <strong>過去分詞:</strong> 動詞 + ed/不規則変化（〜された/〜された状態の）
+        </div>
+        
+        <h3>🎯 前から修飾する分詞（限定用法）</h3>
+        <p><strong>現在分詞:</strong> 「〜している」（能動的・進行的）</p>
+        <div class="example-box">
+            I saw a running boy. (走っている少年を見た)<br>
+            The sleeping baby is cute. (眠っている赤ちゃんはかわいい)<br>
+            Look at the flying bird. (飛んでいる鳥を見て)
+        </div>
+        
+        <p><strong>過去分詞:</strong> 「〜された」（受動的・完了的）</p>
+        <div class="example-box">
+            I like fried chicken. (フライドチキンが好きだ)<br>
+            This is a broken window. (これは壊れた窓だ)<br>
+            She bought a used car. (彼女は中古車を買った)
+        </div>
+        
+        <h3>🎯 後ろから修飾する分詞（限定用法）</h3>
+        <p><strong>現在分詞句:</strong> 分詞 + 語句で後ろから修飾</p>
+        <div class="example-box">
+            The girl playing the piano is my sister. (ピアノを弾いている女の子は私の姉だ)<br>
+            I know the man standing over there. (向こうに立っている男性を知っている)<br>
+            The book lying on the desk is mine. (机の上にある本は私のものだ)
+        </div>
+        
+        <p><strong>過去分詞句:</strong> 分詞 + 語句で後ろから修飾</p>
+        <div class="example-box">
+            The letter written by him was beautiful. (彼によって書かれた手紙は美しかった)<br>
+            The car made in Japan is reliable. (日本で作られた車は信頼できる)<br>
+            I ate the cake baked by my mother. (母によって焼かれたケーキを食べた)
+        </div>
+        
+        <h3>🎯 補語になる分詞（叙述用法）</h3>
+        <p><strong>現在分詞が補語:</strong> 主語の状態・動作を表す</p>
+        <div class="example-box">
+            The story is interesting. (その話は面白い)<br>
+            The work was tiring. (その仕事は疲れるものだった)<br>
+            The movie is exciting. (その映画は興奮させる)
+        </div>
+        
+        <p><strong>過去分詞が補語:</strong> 主語の状態を表す</p>
+        <div class="example-box">
+            I am interested in music. (私は音楽に興味がある)<br>
+            She looked surprised. (彼女は驚いているように見えた)<br>
+            He seems tired. (彼は疲れているようだ)
+        </div>
+        
+        <h3>🎯 知覚動詞 + 目的語 + 現在分詞</h3>
+        <p><strong>「〜が…しているのを見る/聞く」</strong></p>
+        <div class="example-box">
+            I saw him running in the park. (私は彼が公園で走っているのを見た)<br>
+            She heard someone singing. (彼女は誰かが歌っているのを聞いた)<br>
+            We watched the children playing. (私たちは子供たちが遊んでいるのを見た)
+        </div>
+        
+        <p><strong>主な知覚動詞:</strong> see, watch, hear, listen, feel, notice など</p>
+        
+        <h3>📝 分詞の使い分けのポイント</h3>
+        <p><strong>現在分詞:</strong> 能動的・進行的な意味「〜している/〜する」</p>
+        <p><strong>過去分詞:</strong> 受動的・完了的な意味「〜された/〜された状態の」</p>
+        <div class="example-box">
+            interesting (面白い) ⇔ interested (興味を持った)<br>
+            exciting (興奮させる) ⇔ excited (興奮した)<br>
+            surprising (驚かせる) ⇔ surprised (驚いた)
+        </div>
+    `,
+    problems: [
+        {
+            japanese: '走っている少年を見ました。',
+            words: ['I', 'saw', 'a', 'running', 'boy'],
+            correct: ['I', 'saw', 'a', 'running', 'boy']
+        },
+        {
+            japanese: 'テーブルの上にある本は私のものです。',
+            words: ['The', 'book', 'lying', 'on', 'the', 'table', 'is', 'mine'],
+            correct: ['The', 'book', 'lying', 'on', 'the', 'table', 'is', 'mine']
+        },
+        {
+            japanese: '私は音楽に興味があります。',
+            words: ['I', 'am', 'interested', 'in', 'music'],
+            correct: ['I', 'am', 'interested', 'in', 'music']
+        },
+        {
+            japanese: '彼が歌っているのを聞きました。',
+            words: ['I', 'heard', 'him', 'singing'],
+            correct: ['I', 'heard', 'him', 'singing']
+        },
+        {
+            japanese: '日本で作られた車は人気があります。',
+            words: ['Cars', 'made', 'in', 'Japan', 'are', 'popular'],
+            correct: ['Cars', 'made', 'in', 'Japan', 'are', 'popular']
+        },
+        {
+            japanese: 'その映画は興奮させるものでした。',
+            words: ['The', 'movie', 'was', 'exciting'],
+            correct: ['The', 'movie', 'was', 'exciting']
+        },
+        {
+            japanese: '彼女は子供たちが遊んでいるのを見ていました。',
+            words: ['She', 'was', 'watching', 'the', 'children', 'playing'],
+            correct: ['She', 'was', 'watching', 'the', 'children', 'playing']
+        },
+        {
+            japanese: '壊れた窓を修理する必要があります。',
+            words: ['We', 'need', 'to', 'repair', 'the', 'broken', 'window'],
+            correct: ['We', 'need', 'to', 'repair', 'the', 'broken', 'window']
+        }
+    ]
+},
+'relative-adverbs': {
+    title: '関係副詞（when, where, why, how）',
+    summary: `
+        <h2>関係副詞の用法</h2>
+        <p>時・場所・理由・方法を表す関係副詞を使って、名詞を詳しく説明する表現を学びます。</p>
+        
+        <h3>📋 基本構造</h3>
+        <div class="example-box">
+            <strong>when:</strong> 先行詞（時） + when + 主語 + 動詞<br>
+            <strong>where:</strong> 先行詞（場所） + where + 主語 + 動詞<br>
+            <strong>why:</strong> 先行詞（理由） + why + 主語 + 動詞<br>
+            <strong>how:</strong> 先行詞（方法） + how + 主語 + 動詞
+        </div>
+        
+        <h3>🕐 when（時を表す）</h3>
+        <p><strong>先行詞:</strong> time, day, year, moment, season など</p>
+        <div class="example-box">
+            I remember the day when we first met. (私たちが初めて会った日を覚えている)<br>
+            This is the time when students are busy. (これは生徒が忙しい時期だ)<br>
+            Do you know the year when he was born? (彼が生まれた年を知っていますか)
+        </div>
+        
+        <h3>📍 where（場所を表す）</h3>
+        <p><strong>先行詞:</strong> place, house, school, city, country など</p>
+        <div class="example-box">
+            This is the place where I was born. (ここは私が生まれた場所だ)<br>
+            I know a restaurant where we can eat good food. (おいしい食事ができるレストランを知っている)<br>
+            The school where she studies is famous. (彼女が通っている学校は有名だ)
+        </div>
+        
+        <h3>❓ why（理由を表す）</h3>
+        <p><strong>先行詞:</strong> reason のみ</p>
+        <div class="example-box">
+            Tell me the reason why you are late. (遅れた理由を教えて)<br>
+            I don't know the reason why he quit his job. (彼が仕事を辞めた理由がわからない)<br>
+            That's the reason why I came here. (それが私がここに来た理由だ)
+        </div>
+        
+        <h3>🔧 how（方法を表す）</h3>
+        <p><strong>先行詞:</strong> way のみ（しばしば省略される）</p>
+        <div class="example-box">
+            I like the way how he speaks. (彼の話し方が好きだ)<br>
+            This is the way how you can solve the problem. (これが問題を解決する方法だ)<br>
+            Show me the way how to get there. (そこへの行き方を教えて)
+        </div>
+        
+        <p><strong>注意:</strong> way + how は重複するため、通常は way (that) または how のどちらかを使用</p>
+        <div class="example-box">
+            I like the way he speaks. (一般的)<br>
+            I like how he speaks. (一般的)
+        </div>
+        
+        <h3>💫 非制限用法（継続用法）</h3>
+        <p><strong>コンマ（,）で区切られた関係副詞節</strong></p>
+        <div class="example-box">
+            I visited Tokyo, where my friend lives. (私は東京を訪れた。そこは友人が住んでいる場所だ)<br>
+            He came in summer, when it was very hot. (彼は夏に来た。その時はとても暑かった)<br>
+            She explained the reason, why she was absent. (彼女は理由を説明した。なぜ欠席したかという)
+        </div>
+        
+        <h3>📝 関係副詞の省略と書き換え</h3>
+        <p><strong>関係副詞 = 前置詞 + 関係代名詞</strong></p>
+        <div class="example-box">
+            the day when I met him = the day on which I met him<br>
+            the place where I live = the place in which I live<br>
+            the reason why he came = the reason for which he came
+        </div>
+        
+        <p><strong>関係副詞の省略:</strong></p>
+        <div class="example-box">
+            the time (when) I saw him (彼を見た時)<br>
+            the place (where) I live (私が住んでいる場所)<br>
+            the way (how) she walks (彼女の歩き方)
+        </div>
+        
+        <h3>🔄 重要な慣用表現</h3>
+        <div class="example-box">
+            This is where I live. (ここが私の住んでいるところだ)<br>
+            That's when I realized. (その時私は気づいた)<br>
+            This is why I came. (これが私が来た理由だ)<br>
+            This is how you do it. (これがやり方だ)
+        </div>
+    `,
+    problems: [
+        {
+            japanese: '私たちが初めて会った日を覚えています。',
+            words: ['I', 'remember', 'the', 'day', 'when', 'we', 'first', 'met'],
+            correct: ['I', 'remember', 'the', 'day', 'when', 'we', 'first', 'met']
+        },
+        {
+            japanese: 'ここは私が生まれた場所です。',
+            words: ['This', 'is', 'the', 'place', 'where', 'I', 'was', 'born'],
+            correct: ['This', 'is', 'the', 'place', 'where', 'I', 'was', 'born']
+        },
+        {
+            japanese: '彼が遅れた理由を教えてください。',
+            words: ['Tell', 'me', 'the', 'reason', 'why', 'he', 'was', 'late'],
+            correct: ['Tell', 'me', 'the', 'reason', 'why', 'he', 'was', 'late']
+        },
+        {
+            japanese: 'これが問題を解決する方法です。',
+            words: ['This', 'is', 'how', 'you', 'can', 'solve', 'the', 'problem'],
+            correct: ['This', 'is', 'how', 'you', 'can', 'solve', 'the', 'problem']
+        },
+        {
+            japanese: '私は京都を訪れました。そこは美しい都市です。',
+            words: ['I', 'visited', 'Kyoto,', 'where', 'is', 'a', 'beautiful', 'city'],
+            correct: ['I', 'visited', 'Kyoto,', 'which', 'is', 'a', 'beautiful', 'city']
+        },
+        {
+            japanese: '彼女が勉強している学校は有名です。',
+            words: ['The', 'school', 'where', 'she', 'studies', 'is', 'famous'],
+            correct: ['The', 'school', 'where', 'she', 'studies', 'is', 'famous']
+        },
+        {
+            japanese: '生徒たちが忙しい時期です。',
+            words: ['This', 'is', 'the', 'time', 'when', 'students', 'are', 'busy'],
+            correct: ['This', 'is', 'the', 'time', 'when', 'students', 'are', 'busy']
+        },
+        {
+            japanese: '彼の話し方が好きです。',
+            words: ['I', 'like', 'the', 'way', 'he', 'speaks'],
+            correct: ['I', 'like', 'the', 'way', 'he', 'speaks']
+        }
+    ]
+},
+'conjunctions': {
+    title: '接続詞（時・原因・条件・目的・結果）',
+    summary: `
+        <h2>接続詞の用法</h2>
+        <p>文と文をつなぐ接続詞を使って、時間・原因・条件・目的・結果などの関係を表現します。</p>
+        
+        <h3>📋 基本構造</h3>
+        <div class="example-box">
+            <strong>従属接続詞:</strong> 接続詞 + 主語 + 動詞, 主語 + 動詞<br>
+            <strong>または:</strong> 主語 + 動詞 + 接続詞 + 主語 + 動詞
+        </div>
+        
+        <h3>🕐 時を表す接続詞</h3>
+        <p><strong>when:</strong> 「〜する時」</p>
+        <div class="example-box">
+            When I was young, I lived in Tokyo. (若い頃、私は東京に住んでいた)<br>
+            I was studying when he called me. (彼が電話をした時、私は勉強していた)
+        </div>
+        
+        <p><strong>until:</strong> 「〜するまで」</p>
+        <div class="example-box">
+            I waited until he came back. (彼が帰ってくるまで待った)<br>
+            Don't leave until I return. (私が戻るまで出かけないで)
+        </div>
+        
+        <p><strong>as soon as:</strong> 「〜するとすぐに」</p>
+        <div class="example-box">
+            I'll call you as soon as I arrive. (着いたらすぐに電話します)<br>
+            As soon as she saw me, she smiled. (私を見るとすぐに、彼女は微笑んだ)
+        </div>
+        
+        <p><strong>while:</strong> 「〜している間」</p>
+        <div class="example-box">
+            I read a book while I was waiting. (待っている間、本を読んだ)<br>
+            She was cooking while he was watching TV. (彼がテレビを見ている間、彼女は料理をしていた)
+        </div>
+        
+        <h3>💭 原因・理由を表す接続詞</h3>
+        <p><strong>because:</strong> 「〜だから」（理由を強調）</p>
+        <div class="example-box">
+            I was late because the train was delayed. (電車が遅れたので遅刻した)<br>
+            Because it was raining, we stayed home. (雨が降っていたので、家にいた)
+        </div>
+        
+        <p><strong>since:</strong> 「〜だから」（相手も知っている理由）</p>
+        <div class="example-box">
+            Since you are busy, I'll help you. (忙しいようなので、手伝います)<br>
+            Since it's late, let's go home. (遅いので、家に帰りましょう)
+        </div>
+        
+        <p><strong>as:</strong> 「〜だから」（軽い理由）</p>
+        <div class="example-box">
+            As I was tired, I went to bed early. (疲れていたので、早く寝た)<br>
+            As you know, he is very kind. (ご存知のように、彼はとても親切だ)
+        </div>
+        
+        <h3>❓ 条件・譲歩を表す接続詞</h3>
+        <p><strong>if:</strong> 「もし〜なら」</p>
+        <div class="example-box">
+            If it rains tomorrow, we won't go out. (明日雨が降ったら、出かけません)<br>
+            I'll help you if you need me. (必要なら手伝います)
+        </div>
+        
+        <p><strong>unless:</strong> 「〜しない限り」（if not の意味）</p>
+        <div class="example-box">
+            Unless you study hard, you won't pass. (一生懸命勉強しない限り、合格しません)<br>
+            I won't go unless you come with me. (あなたが一緒に来ない限り、行きません)
+        </div>
+        
+        <p><strong>though / although:</strong> 「〜だけれども」</p>
+        <div class="example-box">
+            Though it was cold, we went swimming. (寒かったけれども、泳ぎに行った)<br>
+            Although he is young, he is very smart. (若いけれども、彼はとても賢い)
+        </div>
+        
+        <h3>🎯 目的・結果を表す接続詞</h3>
+        <p><strong>so that:</strong> 「〜するために」（目的）</p>
+        <div class="example-box">
+            I got up early so that I wouldn't be late. (遅れないように早起きした)<br>
+            She spoke slowly so that everyone could understand. (皆が理解できるようにゆっくり話した)
+        </div>
+        
+        <p><strong>so ... that:</strong> 「とても〜なので…」（結果）</p>
+        <div class="example-box">
+            He was so tired that he fell asleep immediately. (とても疲れていたのですぐに眠った)<br>
+            The music was so loud that I couldn't sleep. (音楽がうるさくて眠れなかった)
+        </div>
+        
+        <p><strong>such ... that:</strong> 「とても〜な…なので」（結果）</p>
+        <div class="example-box">
+            It was such a beautiful day that we went to the beach. (とても美しい日だったので海に行った)<br>
+            He is such a kind person that everyone likes him. (とても親切な人なので皆が彼を好きだ)
+        </div>
+        
+        <h3>📝 重要なポイント</h3>
+        <p><strong>時制の一致:</strong> 未来のことでも時・条件の節では現在形</p>
+        <div class="example-box">
+            When he comes, I'll tell him. (彼が来たら、伝えます)<br>
+            If it rains tomorrow, we'll stay home. (明日雨が降ったら、家にいます)
+        </div>
+        
+        <p><strong>so と such の使い分け:</strong></p>
+        <div class="example-box">
+            so + 形容詞/副詞 + that<br>
+            such + (a/an) + 形容詞 + 名詞 + that
+        </div>
+        
+        <p><strong>理由を表す語の強さ:</strong> because > since > as</p><br>
+
+        <p><strong>等位接続詞</strong>⋯and,but,so,forなど</p>
+        <p>2つの語や節、文と文とを対等の関係で繋ぐための接続詞</p><br>
+        <p><strong>従属接続詞</strong>⋯when,because,ifなど</p>
+        <p>ある文に対して情報を補う文を繋ぐための接続詞</p>
+
+            
+
+    `,
+    problems: [
+        {
+            japanese: '若い頃、私は東京に住んでいました。',
+            words: ['When', 'I', 'was', 'young,', 'I', 'lived', 'in', 'Tokyo'],
+            correct: ['When', 'I', 'was', 'young,', 'I', 'lived', 'in', 'Tokyo']
+        },
+        {
+            japanese: '電車が遅れたので遅刻しました。',
+            words: ['I', 'was', 'late', 'because', 'the', 'train', 'was', 'delayed'],
+            correct: ['I', 'was', 'late', 'because', 'the', 'train', 'was', 'delayed']
+        },
+        {
+            japanese: '明日雨が降ったら、出かけません。',
+            words: ['If', 'it', 'rains', 'tomorrow,', 'we', "won't", 'go', 'out'],
+            correct: ['If', 'it', 'rains', 'tomorrow,', 'we', "won't", 'go', 'out']
+        },
+        {
+            japanese: '遅れないように早起きしました。',
+            words: ['I', 'got', 'up', 'early', 'so', 'that', 'I', "wouldn't", 'be', 'late'],
+            correct: ['I', 'got', 'up', 'early', 'so', 'that', 'I', "wouldn't", 'be', 'late']
+        },
+        {
+            japanese: 'とても疲れていたのですぐに眠りました。',
+            words: ['He', 'was', 'so', 'tired', 'that', 'he', 'fell', 'asleep', 'immediately'],
+            correct: ['He', 'was', 'so', 'tired', 'that', 'he', 'fell', 'asleep', 'immediately']
+        },
+        {
+            japanese: '彼が帰ってくるまで待ちました。',
+            words: ['I', 'waited', 'until', 'he', 'came', 'back'],
+            correct: ['I', 'waited', 'until', 'he', 'came', 'back']
+        },
+        {
+            japanese: '一生懸命勉強しない限り、合格しません。',
+            words: ['Unless', 'you', 'study', 'hard,', 'you', "won't", 'pass'],
+            correct: ['Unless', 'you', 'study', 'hard,', 'you', "won't", 'pass']
+        },
+        {
+            japanese: 'とても美しい日だったので海に行きました。',
+            words: ['It', 'was', 'such', 'a', 'beautiful', 'day', 'that', 'we', 'went', 'to', 'the', 'beach'],
+            correct: ['It', 'was', 'such', 'a', 'beautiful', 'day', 'that', 'we', 'went', 'to', 'the', 'beach']
+        }
+    ]
+}
+
+        }
+        // 単元選択
+        function selectUnit(unitId) {
+            currentUnit = unitId;
+            showGrammarSummary();
+        }
+
+        // 文法まとめ表示
+        function showGrammarSummary() {
+            document.getElementById('unitSelection').style.display = 'none';
+            document.getElementById('practiceScreen').style.display = 'none';
+            document.getElementById('grammarSummary').style.display = 'block';
+            
+            const data = grammarData[currentUnit];
+            document.getElementById('summaryContent').innerHTML = data.summary;
+        }
+
+        // 単元選択画面に戻る
+        function showUnitSelection() {
+            document.getElementById('unitSelection').style.display = 'block';
+            document.getElementById('grammarSummary').style.display = 'none';
+            document.getElementById('practiceScreen').style.display = 'none';
+            currentUnit = '';
+        }
+
+        // 練習開始
+        function startPractice() {
+            document.getElementById('grammarSummary').style.display = 'none';
+            document.getElementById('practiceScreen').style.display = 'block';
+            
+            problems = [...grammarData[currentUnit].problems];
+            currentProblem = 0;
+            score = 0;
+            selectedWords = [];
+            
+            loadProblem();
+        }
+
+        // 問題読み込み
+        function loadProblem() {
+            if (currentProblem >= problems.length) {
+                showResults();
+                return;
+            }
+            
+            const problem = problems[currentProblem];
+            document.getElementById('problemNumber').textContent = currentProblem + 1;
+            document.getElementById('problemText').textContent = problem.japanese;
+            
+            // 単語をシャッフル
+            const shuffledWords = [...problem.words].sort(() => Math.random() - 0.5);
+            
+            // 単語バンク表示
+            const wordBank = document.getElementById('wordBank');
+            wordBank.innerHTML = '';
+            shuffledWords.forEach(word => {
+                const wordElement = document.createElement('span');
+                wordElement.className = 'word-token';
+                wordElement.textContent = word;
+                wordElement.onclick = () => selectWord(word, wordElement);
+                wordBank.appendChild(wordElement);
+            });
+            
+            // 答えエリアクリア
+            document.getElementById('answerArea').innerHTML = '';
+            document.getElementById('feedback').innerHTML = '';
+            document.getElementById('nextButton').style.display = 'none';
+            
+            // プログレスバー更新
+            const progress = (currentProblem / problems.length) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            
+            selectedWords = [];
+        }
+
+        // 単語選択
+        function selectWord(word, element) {
+            if (element.style.display === 'none') return;
+            
+            selectedWords.push(word);
+            element.style.display = 'none';
+            
+            // 答えエリアに追加
+            const answerArea = document.getElementById('answerArea');
+            const wordElement = document.createElement('span');
+            wordElement.className = 'word-token in-answer';
+            wordElement.textContent = word;
+            wordElement.onclick = () => removeWord(word, wordElement);
+            answerArea.appendChild(wordElement);
+        }
+
+        // 単語除去
+        function removeWord(word, element) {
+            const index = selectedWords.indexOf(word);
+            if (index > -1) {
+                selectedWords.splice(index, 1);
+            }
+            element.remove();
+            
+            // 単語バンクに戻す
+            const wordBank = document.getElementById('wordBank');
+            const wordTokens = wordBank.querySelectorAll('.word-token');
+            wordTokens.forEach(token => {
+                if (token.textContent === word && token.style.display === 'none') {
+                    token.style.display = 'inline-block';
+                }
+            });
+        }
+
+        // 答えチェック
+        function checkAnswer() {
+            const problem = problems[currentProblem];
+            const correct = JSON.stringify(selectedWords) === JSON.stringify(problem.correct);
+            
+            const feedback = document.getElementById('feedback');
+            if (correct) {
+                feedback.innerHTML = '<div class="feedback correct">🎉 正解！よくできました！</div>';
+                score++;
+            } else {
+                feedback.innerHTML = `
+                    <div class="feedback incorrect">
+                        ❌ 不正解です。<br>
+                        正解: ${problem.correct.join(' ')}
+                    </div>
+                `;
+            }
+            
+            document.getElementById('nextButton').style.display = 'inline-block';
+        }
+
+        // 次の問題
+        function nextProblem() {
+            currentProblem++;
+            loadProblem();
+        }
+
+        // 結果表示
+        function showResults() {
+            const percentage = Math.round((score / problems.length) * 100);
+            let message = '';
+            
+            if (percentage >= 90) {
+                message = '🏆 素晴らしい！完璧に理解できています！';
+            } else if (percentage >= 70) {
+                message = '👍 よくできました！基本はしっかり理解できています！';
+            } else if (percentage >= 50) {
+                message = '📚 もう少し練習しましょう！復習してから再挑戦してください！';
+            } else {
+                message = '💪 文法まとめをもう一度確認して、再度チャレンジしてください！';
+            }
+            
+            document.getElementById('practiceScreen').innerHTML = `
+                <div style="text-align: center; padding: 50px;">
+                    <h2>🎯 練習完了！</h2>
+                    <div style="font-size: 3em; margin: 20px 0;">${percentage}%</div>
+                    <p style="font-size: 1.2em; margin-bottom: 30px;">${score}/${problems.length} 問正解</p>
+                    <p style="font-size: 1.1em; margin-bottom: 40px;">${message}</p>
+                    <button class="button" onclick="showGrammarSummary()">文法まとめに戻る</button>
+                    <button class="button" onclick="startPractice()">もう一度練習</button>
+                    <button class="button" onclick="showUnitSelection()">単元選択に戻る</button>
+                </div>
+            `;
+        }
+
+        // 初期化
+        document.addEventListener('DOMContentLoaded', function() {
+            showUnitSelection();
+        });
+    </script>
+</body>
+</html>
